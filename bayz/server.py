@@ -31,7 +31,22 @@ class BayzServer:
 
         def do_GET(self):
             self._send_headers()
-            json_data = json.dumps({'hello': 'world', 'received': 'ok'})
+            json_data = json.dumps({
+                'sound': [
+                    {
+                        'name': 'sine',
+                        'notes': [60, 63, 67, 70],
+                        'rhythm': [1, 2, 3],
+                    },
+                    {
+                        'name': 'sine',
+                        'notes': [63, 67, 70, 74],
+                        'rhythm': [3, 2, 1],
+                    }
+                ],
+                'cycleLength': 2,
+                'deploy': True
+            })
             self.wfile.write(json_data.encode('utf-8'))
 
         def _send_headers(self):
