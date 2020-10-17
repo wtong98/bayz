@@ -20,9 +20,13 @@ from music21 import interval
 from music21 import note
 
 from sklearn.mixture import BayesianGaussianMixture
-
 from tqdm import tqdm
 
+from common import BayesianGaussianTypeModel
+
+REST_WORD = 'REST'
+START_WORD = 'START'
+END_WORD = 'END'
 
 save_path = Path('save/')
 corpus_path = save_path / 'corpus.pk'
@@ -69,7 +73,7 @@ def _to_text(score, sampling_rate) -> list:
     hist = _bin(notes, sampling_rate)
     end = score.flat.highestOffset
 
-    text = [_to_word(hist[i]) for i in np.arange(0, end, sampling_rate)]
+    text = [START_WORD] + [_to_word(hist[i]) for i in np.arange(0, end, sampling_rate)] + [END_WORD]
     return text
 
 
@@ -92,12 +96,12 @@ def _bin(notes, sampling_rate) -> defaultdict:
     return hist
 
 
-def _to_word(notes, rest_word="REST") -> str:
+def _to_word(notes) -> str:
     if len(notes) == 0:
-        return rest_word
+        return REST_WORD
 
     ordered_notes = sorted(notes, key=lambda n: n.pitch.midi, reverse=True)
-    word = ''.join([note.name for note in ordered_notes])
+    word = '_'.join([note.name for note in ordered_notes])
     return word
 
 
@@ -117,18 +121,18 @@ def train_wv_model(texts, save=True) -> 'Word2Vec':
     
     return model
 
-def fit_mixture(points, save=True, plot=True):
-    mixture = BayesianGaussianMixture(n_components=32)
-    mixture.fit(points)
 
-    labels = mixture.predict(points)
+def fit_mixture(embedding, texts, save=True, plot=True):
+    mixture = BayesianGaussianTypeModel(embedding, n_components=32)
+    mixture.fit(texts)
+
+    labels = mixture.predict(embedding.wv.vectors)
     if plot:
         plt.hist(labels, bins=32)
         plt.savefig(plot_path)
     
     if save:
-        with mixture_path.open('wb') as fp:
-            pickle.dump(mixture, fp)
+        mixture.save_model(mixture_path)
 
     return labels
 
@@ -169,13 +173,13 @@ if __name__ == '__main__':
     texts = fetch_texts()
 
     print('training word2vec model')
-    wv = train_wv_model(texts).wv
+    embedding = train_wv_model(texts)
 
     print('fitting mixture model')
-    labels = fit_mixture(wv.vectors)
+    labels = fit_mixture(embedding, texts)
 
     print('training hmm')
-    sequences = texts_to_seqs(texts, wv, labels)
+    sequences = texts_to_seqs(texts, embedding.wv, labels)
     hmm = train_hmm(sequences)
     print('fitted weight matrix', hmm.transmat_)
     print('done!')
