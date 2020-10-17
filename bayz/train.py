@@ -22,7 +22,7 @@ from music21 import note
 from sklearn.mixture import BayesianGaussianMixture
 from tqdm import tqdm
 
-from common import BayesianGaussianTypeModel
+from .common import BayesianGaussianTypeModel
 
 REST_WORD = 'REST'
 START_WORD = 'START'

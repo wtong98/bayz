@@ -2,3 +2,4 @@
 music/
 .vscode/
 save/
+__pycache__/

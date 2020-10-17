@@ -15,7 +15,7 @@ from music21 import tie
 import numpy as np
 import scipy
 
-from common import BayesianGaussianTypeModel
+from .common import BayesianGaussianTypeModel
 
 REST_WORD = 'REST'
 START_WORD = 'START'
