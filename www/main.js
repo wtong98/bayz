@@ -97,7 +97,7 @@ function makeBlock(tag, cycleLength) {
                 const len = tag.rhythm.length;
                 const stopTime = cursor + tag.rhythm[i % len] * unit;
 
-                instrument.play(note, cursor, stopTime);
+                instrument.play(note, cursor, stopTime - 0.01);
                 cursor = stopTime;
             });
         }
