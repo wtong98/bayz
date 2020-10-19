@@ -12,7 +12,9 @@ const tickDelay = 1000;
 const bayzServer = 'http://localhost:42700';
 
 const nameToKernel = {
-    sine: sineKernel
+    sine: sineKernel,
+    bell: bellKernel,
+    warble: warbleKernel
 }
 
 const globalState = {
@@ -21,6 +23,7 @@ const globalState = {
     ticker: Infinity,
 }
 
+const body = document.getElementsByTagName('body')[0];
 const startButton = document.getElementById('start');
 startButton.addEventListener('click', function(event){
     if (audioCtx == undefined) {
@@ -33,12 +36,16 @@ startButton.addEventListener('click', function(event){
 
         startButton.style.backgroundColor = "white";
         startButton.style.color = "black";
+        startButton.innerHTML = "start"
+        body.style.animation = "";
     } else {
         servOn = true;
         audioCtx.resume()
 
-        startButton.style.backgroundColor = "#6d1aa1";
+        startButton.style.backgroundColor = "#24464f";
         startButton.style.color = "white";
+        startButton.innerHTML = "stop"
+        body.style.animation = "vibe 4s infinite";
 
         tick();
         poll(bayzServer);
@@ -135,7 +142,6 @@ function makeInstrument(osc, gain, attack=0.01, sustain=0.1, decay=0.03) {
 
         start() {
             gain.gain.value = 0;
-            osc.connect(gain);
             gain.connect(audioCtx.destination);
             osc.start();
         },
@@ -163,6 +169,69 @@ function sineKernel() {
     osc.connect(gainNode);
 
     return [osc, gainNode];
+}
+
+
+function bellKernel() {
+    const partials = [1, 2, 2.5, 3, 4, 5.3, 6.6, 8]
+    const oscs = partials.map(() => audioCtx.createOscillator());
+
+    const bellOsc = {
+        oscs: oscs,
+        start() {
+            oscs.map((o)=>o.start());
+        },
+
+        stop() {
+            oscs.map((o)=>o.stop());
+        },
+
+        frequency: {
+            setValueAtTime(freq, start, stop) {
+                oscs.map((o, i)=>o.frequency.setValueAtTime(freq * partials[i], start, stop));
+            }
+        }
+    }
+
+    const gainNode = audioCtx.createGain();
+    bellOsc.oscs.map((o)=>o.connect(gainNode));
+
+    return [bellOsc, gainNode, 0.01, 0.01];
+}
+
+function warbleKernel() {
+    const carrier = audioCtx.createOscillator();
+    const mod = audioCtx.createOscillator();
+
+    const gainNode = audioCtx.createGain();
+    gainNode.gain.value = 0;
+
+    const modIdx = audioCtx.createGain();
+    modIdx.gain.value = 25;
+    mod.frequency.value = 15;
+
+    mod.connect(modIdx).connect(carrier.frequency);
+    carrier.connect(gainNode);
+
+    const warbleOsc = {
+        start() {
+            mod.start();
+            carrier.start();
+        },
+
+        stop() {
+            mod.stop();
+            carrier.stop();
+        },
+
+        frequency: {
+            setValueAtTime(freq, start, stop) {
+                carrier.frequency.setValueAtTime(freq, start, stop);
+            }
+        }
+    }
+
+    return [warbleOsc, gainNode];
 }
 
 function midiToFreq(m) {

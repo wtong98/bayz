@@ -33,7 +33,6 @@ def to_token(types, mixture, embedding):
     for symbol in types:
         new_vec = mixture.emit(symbol, words) # instantiate and use previous words
         words.append(_decode(embedding, new_vec))
-    print('raw_words', words)
     token_seq = [word.split('_') for word in words]
 
     return token_seq
@@ -93,6 +92,21 @@ def melody_texture(token_seq, duration=0.25, use_last=False):
                     yield(note.Note(elem, quarterLength=duration))
 
 
+def to_midi(token_seq, use_last=False):
+    for token in token_seq:
+        if token[0] != REST_WORD or token[0] not in (START_WORD, END_WORD):
+            candidate_notes = []
+            if use_last:
+                candidate_notes.append(note.Note(token[-1]))
+            else:
+                for elem in token:
+                    candidate_notes.append(note.Note(elem))
+            
+            for n in candidate_notes:
+                yield n.pitch.midi
+
+
+
 
 if __name__ == '__main__':
     embedding = load_model(Path('save/embedding.wv'))
@@ -100,11 +114,10 @@ if __name__ == '__main__':
     mixture.load_model(Path('save/mixture.pk'))
     hmm = load_model(Path('save/hmm.pk'))
 
-    types, _ = hmm.sample(10)
+    types, _ = hmm.sample(5)
     types = types.flatten()
     print('Sampled', types)
 
     tokens = to_token(types, mixture, embedding)
-    print('tokens', tokens)
     score = to_score(tokens, melody_texture)
     score.show('musicxml')

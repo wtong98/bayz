@@ -17,3 +17,9 @@
 body {
     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
 }
+
+@keyframes vibe {
+    0% {background-color: white;}
+    50% {background-color: #aae1f3;}
+    100% {background-color: white;}
+  }

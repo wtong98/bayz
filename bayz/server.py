@@ -46,22 +46,6 @@ class BayzRequestHandler(http.server.BaseHTTPRequestHandler):
 
         self._send_headers()
         json_data = json.dumps(globalData)
-        # json_data = json.dumps({
-        #     'sound': [
-        #         {
-        #             'name': 'sine',
-        #             'notes': [60, 63, 67, 70],
-        #             'rhythm': [1, 2, 3],
-        #         },
-        #         {
-        #             'name': 'sine',
-        #             'notes': [63, 67, 70, 74],
-        #             'rhythm': [3, 2, 1],
-        #         }
-        #     ],
-        #     'cycleLength': 2,
-        #     'deploy': True
-        # })
         self.wfile.write(json_data.encode('utf-8'))
         globalData = {}
 
@@ -70,6 +54,9 @@ class BayzRequestHandler(http.server.BaseHTTPRequestHandler):
         self.send_header('Content-type', 'application/json; charset=utf-8')
         self.send_header('Access-Control-Allow-Origin', '*')
         self.end_headers()
+    
+    def log_message(self, format, *args):
+        return # silence logging
 
 
 if __name__ == '__main__':

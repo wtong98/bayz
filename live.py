@@ -26,28 +26,32 @@ r"""
    \  |-|-------b------------------------------------|--o|------------
     \ |                                              |                
       +----------------------------------------------+----------------
+
+art by asciiart.eu
 """
 
 # <codecell>
 from bayz.music import Band
 from bayz.server import BayzServer
 
-# <codecell>
+# start server
 server = BayzServer(port=42700)
 server.start()
 
-# <codecell>
-b = Band()
+# start band
+b = Band(pre_gen=3)
 b.connect(server)
 
+# <codecell>
+# --- bayz band -o-o-o----------
+
+
+
+
+
+
+
+
+
 # ------------------------------
-
-
-
-
-
-
-
-# ------------------------------
-
 b.commit()
