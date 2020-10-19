@@ -45,7 +45,8 @@ b.connect(server)
 # <codecell>
 # --- bayz band -o-o-o----------
 
-
+# Live code here! Uncomment and try the following line
+# b.add_player()
 
 
 

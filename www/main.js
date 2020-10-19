@@ -1,5 +1,7 @@
 /**
- * Logic for controlling browser-side audio production with webaudio
+ * Logic for controlling browser-side audio production with webaudio.
+ * Producing bayz requires the bayz band live coding interface. For more
+ * information, see https://github.com/wtong98/bayz.
  * 
  * @author William Tong
  */

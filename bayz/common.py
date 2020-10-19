@@ -1,5 +1,8 @@
 """
-Common files and values used across BayesClef
+Common files and values used across bayz. As of now, it is home only to the
+BayesianGaussianTypeModel. Much of this class has been adapted from
+https://github.com/wtong98/4772-Project, which was mostly authored by
+@huberf. The comments are my own.
 
 author: William Tong (wlt2115@columbia.edu)
 """
@@ -15,7 +18,21 @@ from sklearn.mixture import BayesianGaussianMixture
 import scipy.stats
 
 class BayesianGaussianTypeModel:
+    """
+    Convenience class that wraps an underlying Gaussian mixture model with
+    additional project-relevant sampling procedures and calculation
+    """
+
     def __init__(self, embedding, n_components=32, smooth: int = 0.01, do_conditional: bool = True):
+        """
+        param embedding: gensim.Word2Vec model
+        param n_components: number of mixtures to fit. Not an exact number -- it
+                            will be tuned by the algorithm
+        param smooth: smoothing factor for unseen n-grams
+        param do_conditional: whether to apply conditional calculations when
+                              sampling
+        """
+
         self.embedding = embedding
         self.n_grams = [2, 3] # set up for 2 and 3-gram combo
         self.do_conditional = do_conditional
@@ -26,6 +43,13 @@ class BayesianGaussianTypeModel:
         self.norm_prob_cache = {}
 
     def fit(self, scores):
+        """
+        Fits a mixture model to the provided embedding, and generates n-gram
+        probabilities for the associated scores
+
+        param scores: scores for which to generate n-gram probabilities
+        """
+
         self.mixture = BayesianGaussianMixture(n_components=self.n)
         self.mixture.fit(self.embedding.wv.vectors)
         # Fit conditional dependence model
@@ -41,24 +65,30 @@ class BayesianGaussianTypeModel:
 
 
     def predict(self, vector):
+        """
+        Returns the id of the mixture that vector most likely belongs to
+        """
+
         return self.mixture.predict(vector)
 
     def conditional_prob(self, option, prev_words):
-        ''' Produces a smoothed n-gram probability
-            but not divided by the total sum and thus
-            not strictly a PDF but rather a constant
-            scaling of one
-        '''
+        """
+        Calculates the probabilities of an n-gram
+        """
+
         smooth_count = 0
         for n_gram in self.n_grams:
             prev_key = tuple(prev_words[-(n_gram-1):])
             followers = self.gram_map[n_gram][prev_key]
             smooth_count += followers[option] + self.smooth #*((n_gram-1)**2) + self.smooth
-        # TODO: Maybe make into a true pmf (i.e. sum to 1) but
-        # this won't improve results or change anything
         return smooth_count
 
     def emit(self, type_id, prev_words=[]):
+        """
+        Samples a new token for the given mixture id based in previously
+        observed tokens
+        """
+
         mean = self.mixture.means_[type_id,:]
         cov = self.mixture.covariances_[type_id,:,:]
         if len(prev_words) == [] or not self.do_conditional: # if not conditioning on previous
@@ -80,10 +110,18 @@ class BayesianGaussianTypeModel:
         return draw
 
     def save_model(self, file_name):
+        """
+        Pickles the model parameters
+        """
+
         s = pickle.dumps({ 'mixture': self.mixture, 'gram_map': self.gram_map })
         open(file_name, 'wb').write(s)
 
     def load_model(self, file_name):
+        """
+        Reloads the model parameters
+        """
+
         s = open(file_name, 'rb').read()
         data = pickle.loads(s)
         self.mixture = data['mixture']
