@@ -63,6 +63,8 @@ b.add_player(rhythm=[1], instrument='sine')
 ```
 to have the machine come up with notes for you.
 
+For more detailed guidelines about making music, check out the [blog post](https://wlt.coffee/posts/2020-10-19-bayz-live-coding/#making-music-with-bayz-band).
+
 Play around with different settings. Probe the documentation (especially in
 `bayz/music.py`) for new settings to try. Make it your own, and hope you
 enjoy!
