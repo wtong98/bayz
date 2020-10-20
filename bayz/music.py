@@ -28,6 +28,8 @@ class Band:
 
         if type(model_path) == str:
             model_path = Path(model_path)
+
+        print('starting band...')
         self._load_model(model_path)
 
         self.cycleLength = cycleLength

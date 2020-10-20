@@ -28,6 +28,12 @@ r"""
       +----------------------------------------------+----------------
 
 art by asciiart.eu
+
+
+To start:
+  1. execute the first cell to create a server instance and a new Band
+  2. start the WebAudio client at https://wlt.coffee/cream/bayz
+  3. type your code in the second cell, and execute to make music!
 """
 
 # <codecell>

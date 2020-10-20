@@ -37,7 +37,7 @@ import threading
 globalData = {}
 
 class BayzServer:
-    def __init__(self, port):
+    def __init__(self, port=42700):
         """
         param port: port to listen for bayz beats
         """
